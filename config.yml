@@ -1,0 +1,119 @@
+#!/usr/bin/env cwl-runner
+
+cwl:tool: rhapsody
+
+# This is a template YML file used to specify the inputs for a BD Rhapsody Sequence Analysis pipeline run. See the
+# BD Genomics Analysis Setup User Guide (Doc ID: 47383) for more details. Enter the following information:
+
+
+## Reads (required) - Path to your read files in the FASTQ.GZ format. You may specify as many R1/R2 read pairs as you want.
+Reads:
+
+ - class: File
+   location: "test/mySample_R1_.fastq.gz"
+
+ - class: File
+   location: "test/mySample_R2_.fastq.gz"
+
+
+## Assay type will be inferred from the provided reference(s)
+## Do not provide both Reference_Archive and Targeted_Reference at the same time
+##
+## Valid reference input combinations:
+##   Reference_Archive                                              (WTA only)
+##   Reference_Archive + AbSeq_Reference                            (WTA + AbSeq)
+##   Reference_Archive + Supplemental_Reference                     (WTA + extra transgenes)
+##   Reference_Archive + AbSeq_Reference + Supplemental_Reference   (WTA + AbSeq + extra transgenes)
+##   Targeted_Reference                                             (Targeted only)
+##   Targeted_Reference + AbSeq_Reference                           (Targeted + AbSeq)
+##   AbSeq_Reference                                                (AbSeq only)
+
+
+## Reference_Archive (required for WTA mRNA assay) - Path to Rhapsody WTA Reference in the tar.gz format. See Doc ID: 47383 for instructions to obtain pre-built Rhapsody Reference file
+##
+##   --Structure of reference archive--
+##   BD_Rhapsody_Reference_Files/
+##       star_index/
+##           [files created with star genomeGenerate]
+##       [gene-transcript-annotation - e.g. gencode42].gtf
+##
+Reference_Archive:
+  class: File
+  location: "test/RhapRef_Human_WTA_2023-02.tar.gz"
+
+## Targeted_Reference (required for Targeted mRNA assay) - Path to the targeted reference file in FASTA format.
+#Targeted_Reference:
+# - class: File
+#   location: "test/BD_Rhapsody_Immune_Response_Panel_Hs.fasta"
+
+## AbSeq_Reference (optional) - Path to the AbSeq reference file in FASTA format.  Only needed if BD AbSeq Ab-Oligos are used.
+## For putative cell calling using an AbSeq dataset, please provide an AbSeq reference fasta file as the AbSeq_Reference.
+#AbSeq_Reference:
+# - class: File
+#   location: "test/AbSeq_reference.fasta"
+
+## Supplemental_Reference (optional) - Path to the supplemental reference file in FASTA format.  Only needed if there are additional transgene sequences to be aligned against in a WTA assay experiment
+#Supplemental_Reference:
+# - class: File
+#   location: "test/supplemental_reference.fasta"
+
+####################################
+## Putative Cell Calling Settings ##
+####################################
+
+## Putative cell calling dataset (optional) - Specify the dataset to be used for putative cell calling: mRNA or AbSeq
+## For putative cell calling using an AbSeq dataset, please provide an AbSeq_Reference fasta file above.
+## By default, the mRNA data will be used for putative cell calling.
+#Putative_Cell_Call: mRNA
+
+## Exact cell count (optional) - Set a specific number (>=1) of cells as putative, based on those with the highest error-corrected read count
+#Exact_Cell_Count: 10000
+
+## Enable Refined Putative Cell Calling (optional) - Putative cells are determined using the basic algorithm (minimum second derivative along the cumulative reads curve).  The refined algorithm builds on the basic cell call, by analyzing expression patterns to remove false positives and recover false negatives.  The refined algoritm may not be suitable for noisy datasets, and certain mixtures of cell types.  Does not apply if Exact Cell Count is set.
+## The values can be true or false. By default, the refined algorithm is not used.
+#Enable_Refined_Cell_Call: true
+
+## Expected Cell Count (optional) - Guide the basic putative cell calling algorithm by providing an estimate of the number of cells expected.  Usually this can be the number of cells loaded into the Rhapsody cartridge.  If there are multiple inflection points on the second derivative cumulative curve, this will ensure the one selected is near the expected. 
+#Expected_Cell_Count: 20000
+
+
+####################################
+## Intronic Reads Settings ##
+####################################
+
+## Exclude_Intronic_Reads (optional)
+## By default, the flag is false, and reads aligned to exons and introns are considered and represented in molecule counts. When the flag is set to true, intronic reads will be excluded.
+## The value can be true or false.
+#Exclude_Intronic_Reads: true
+
+#######################
+## Multiplex options ##
+#######################
+
+## Sample Tags Version (optional) - Specify if multiplexed run: human, mouse, flex
+#Sample_Tags_Version: human
+
+## Tag_Names (optional) - Specify the tag number followed by '-' and the desired sample name to appear in Sample_Tag_Metrics.csv
+# Do not use the special characters: &, (), [], {},  <>, ?, |
+#Tag_Names: [4-mySample, 9-myOtherSample, 6-alsoThisSample]
+
+################
+## VDJ option ##
+################
+
+## VDJ Version (optional) - Specify if VDJ run: human, mouse, humanBCR, humanTCR, mouseBCR, mouseTCR
+#VDJ_Version: human
+
+########################
+## Additional Options ##
+########################
+
+## Run Name (optional)-  Specify a run name to use as the output file base name. Use only letters, numbers, or hyphens. Do not use special characters or spaces.
+#Run_Name: my-experiment
+
+## Generate Bam (optional, default: false) - Specify whether to create the BAM file output
+#Generate_Bam: true
+
+## Maximum_Threads (integer, optional, default: [use all cores of CPU]) - Set the maximum number of threads to use in the read processing steps of the pipeline:  QualCLAlign, AlignmentAnalysis, VDJ assembly
+#Maximum_Threads: 16
+
